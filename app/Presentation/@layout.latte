@@ -3,17 +3,47 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-
+	<link rel="stylesheet" href="{$basePath}/css/style.css">
 	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Web</title>
 </head>
 
+<header>
+	
+	<div class="logoContainer">
+		<a href="/"><img src="{$basePath}/img/logo.png" alt="logo webzi"></a>
+		<strong><span>POZNÁMKOVÝ BLOG</span></strong>
+		
+	</div>
+	<div class="navContainer">
+		<nav>
+			<ul>
+				<li><a href="{$basePath}/home">Domů</a></li>
+				<li><a href="{$basePath}/posts">Proces projektu</a></li>
+				<li><a href="{$basePath}/contact">Kontakt</a></li>
+			</ul>
+		</nav>
+	</div>
+
+
+</header>
+
 <body>
+	<main>
+
 	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+	
 
 	{include content}
 
 	{block scripts}
 	<script src="https://unpkg.com/nette-forms@3"></script>
 	{/block}
+
+	
+
+	</main>
 </body>
+<footer>
+	<p>Vytvořilo &#128376; <a href="https://webzi.cz">WEBZI</a></p>
+</footer>
 </html>

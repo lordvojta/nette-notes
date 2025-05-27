@@ -1,0 +1,187 @@
+
+/* -------------------OBECNE---------------------------------- */
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+    overscroll-behavior: none;
+}
+
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: whitesmoke;
+    font-family: Montserrat, sans-serif;
+    align-items: center;
+}
+
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+
+
+
+
+
+/* -----------------------HEADER------------------------------ */
+
+header {
+    display: flex;
+    flex-direction: row;
+    background-color: darkred;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    top: 0;
+    position: fixed;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+header span {
+  font-size: 1.5em;
+}
+
+
+header img {
+    height: 50px;
+    width: auto;
+    
+}
+
+header li {
+    list-style: none;
+    margin: 0 10px;
+    display: inline;
+    font-weight: bold;
+}
+
+header a {
+    color: white;
+    text-decoration: none;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+
+/* --------------------FOOTER------------------------ */
+
+footer {
+    display: flex;
+    flex-direction: row;
+    background-color: darkred;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+}
+
+
+footer a {
+    color: white;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/*----------------------- ARCHIV POZNAMEK ------------------------------*/
+
+.postArchive {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+}
+
+.postArchiveItem {
+    background: lightgrey;
+    border-radius: 20px;
+    padding: 2em;
+    width: 30dvw;
+    margin: 1em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    object-fit: contain;
+}
+
+
+@media (max-width: 667px) {
+    .postArchive {
+        grid-template-columns: 1fr;
+        object-fit: contain;
+        padding-top: 100px;
+        padding-bottom: 100px;
+
+    }
+
+    .postArchiveItem {
+        width: 90%;
+        align-self: center;
+        justify-self: center;
+        
+    }
+}
+
+
+/* ----------------------- FILTRACE ------------------------------*/
+
+.filtr {
+ background-color: lightgrey;
+ border-radius: 15px;
+ padding: 2em;
+ margin: 2em;
+ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+ justify-content: space-between;   
+}
+
+@media screen and (max-width: 667px) {
+    .filtr {
+        padding-top: 1000px;
+        width: 90%;
+        align-self: center;
+        justify-self: center;
+    }
+    
+}
+
+.filtrItem {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+
+
+.filtrIkona {
+    width: 25px;
+    height: auto;
+    vertical-align: middle;
+}
+
+.filtr input {
+    border-radius: 5px;
+    border: 2px solid darkred;
+    height: 30px;
+}
+
+
+
+
