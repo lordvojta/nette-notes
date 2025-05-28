@@ -4,10 +4,13 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="{$basePath}/css/style.css">
-	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Web</title>
+	<title>{ifset title}{include title|stripHtml} | {/ifset}WEBZI NOTES</title>
 </head>
 
-<header>
+
+
+<body>
+	<header>
 	
 	<div class="logoContainer">
 		<a href="/"><img src="{$basePath}/img/logo.png" alt="logo webzi"></a>
@@ -16,24 +19,26 @@
 	</div>
 	<div class="navContainer">
 		<nav>
-			<ul>
+			<ul class="mainNav">
 				<li><a href="{$basePath}/home">Domů</a></li>
 				<li><a href="{$basePath}/posts">Proces projektu</a></li>
 				<li><a href="{$basePath}/contact">Kontakt</a></li>
 			</ul>
+			<img src="/img/burger.svg" alt="mobilni menu ikona" class="burgerMenu">
 		</nav>
 	</div>
 
 
 </header>
-
-<body>
 	<main>
 
 	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
 	
 
 	{include content}
+
+
+	
 
 	{block scripts}
 	<script src="https://unpkg.com/nette-forms@3"></script>
@@ -42,8 +47,9 @@
 	
 
 	</main>
-</body>
-<footer>
+	<footer>
 	<p>Vytvořilo &#128376; <a href="https://webzi.cz">WEBZI</a></p>
 </footer>
+</body>
+
 </html>

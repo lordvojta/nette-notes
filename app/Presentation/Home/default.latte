@@ -1,30 +1,119 @@
 {block content}
-
-
-	<section class="filtr">
-		<a><div class="filtrItem">Přidáno&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
-		<a><div class="filtrItem">Přidáno&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
-		<a><div class="filtrItem">Přidáno&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+    <section class="filtr">
+		<img class="filtrIkona addPost" src="/img/add.svg" alt="přidat poznámku">		<a href="#"><div class="filtrItem">Přidáno&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+		<a href="#"><div class="filtrItem">Deadline&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+		<a href="#"><div class="filtrItem">Barva&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+		<a href="#"><div class="filtrItem">Filtrovat&nbsp;<img class="filtrIkona" src="/img/filter.svg"></div></a>
 		<input type="text" class="filtrSearch" placeholder="Hledat...">
+		<a href="#"><div class="filtrItem"><img class="filtrIkona resetFiltr" src="/img/reset.svg" alt="resetovat filtraci"></div></a>
+
+
 	</section>
 
-		<section class="postArchive">
+  <section class="postArchive">
+    {foreach $posts as $post}
+      <div
+        class="postArchiveItem {$post->color}"    {* CSS třída podle barvy *}
+        data-id="{$post->id}"
+        data-title="{$post->title|escape:'html'}"
+        data-deadline="{$post->deadline|date:'Y-m-d'}"
+        data-content="{$post->content|escape:'html'}"
+        data-color="{$post->color}"
+      >
+        <h2>{$post->title}</h2>
+        <div><span class="zadano">Zadáno:</span>
+          {$post->created_at|date:'F j, Y'}
+        </div>
+        <div><span class="deadline">Deadline:</span>
+          {$post->deadline|date:'F j, Y'}
+        </div>
+        <br>
+        <div>{$post->content|truncate:255}</div>
+        <div class="filtrItem">
+          {* Ikona pro otevření modalu „Upravit poznámku“ *}
+          <a href="javascript:void(0)" class="editPostBtn">
+            <img class="editPost" src="/img/edit.svg" alt="editovat poznámku">
+          </a>
+        </div>
+      </div>
+    {/foreach}
+  </section>
 
+  {* ===== MODAL – Přidání poznámky ===== *}
+  <div id="addModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      {* Křížek pro zavření *}
+      <button class="modal-close">&times;</button>
+      <h2>Nová poznámka</h2>
+      {* Zobrazení Nette formuláře postForm *}
+      {control postForm}
+    </div>
+  </div>
 
-	{foreach $posts as $post}
-		
-		<div class="postArchiveItem">
-				<h2>{$post->title}</h2>
-				<div><span>Zadáno:</span> {$post->created_at|date:'F j, Y'}</div>
-				<div><span>Deadline:</span> {$post->deadline|date:'F j, Y'}</div>
-				<div><span>Barva:</span> {$post->color}</div>
-				<div>{$post->content|truncate:256}</div>
-		</div>
-		
-		
+  {* ===== MODAL – Úprava poznámky ===== *}
+  <div id="editModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      {* Křížek pro zavření *}
+      <button class="modal-close">&times;</button>
+      <h2>Upravit poznámku</h2>
+      {* Zobrazení Nette formuláře editForm *}
+      {control editForm}
+    </div>
+  </div>
 
-	{/foreach}
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Získání elementů pro „Přidat“
+    const addBtn   = document.querySelector('.addPost');
+    const addModal = document.getElementById('addModal');
 
-		</section>
+    // Získání elementů pro „Upravit“
+    const editBtns  = document.querySelectorAll('.editPostBtn');
+    const editModal = document.getElementById('editModal');
 
+    // Společné elementy pro zavření (overlay + křížek)
+    const overlays  = document.querySelectorAll('.modal-overlay');
+    const closeBtns = document.querySelectorAll('.modal-close');
+
+    // Otevření modalu pro přidání
+    addBtn.addEventListener('click', () => {
+      addModal.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+    });
+
+    // Otevření modalu pro úpravu s naplněním dat
+    editBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.postArchiveItem');
+        const form = editModal.querySelector('form');
+
+        // Naplníme skryté pole id a ostatní kontrolky
+        form.elements.id.value       = item.dataset.id;
+        form.elements.title.value    = item.dataset.title;
+        form.elements.deadline.value = item.dataset.deadline;
+        form.elements.content.value  = item.dataset.content;
+
+        // Naplnění RadioList barvy
+        form.querySelectorAll('input[name="color"]').forEach(r => {
+          r.checked = (r.value === item.dataset.color);
+        });
+
+        editModal.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    // Zavření všech otevřených modalů
+    [...overlays, ...closeBtns].forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.modal.modal-open').forEach(m => {
+          m.classList.remove('modal-open');
+        });
+        document.body.style.overflow = '';
+      });
+    });
+  });
+  </script>
 {/block}
