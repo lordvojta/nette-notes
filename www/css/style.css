@@ -156,6 +156,26 @@ footer a:hover {
     grid-gap: 20px;
 }
 
+.postArchiveItemHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.postArchiveItemHeader img {
+    width: 30px;
+    height: auto;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+}
+
+.postArchiveItemHeader img:hover {
+    transform: scale(1.2);
+    transition: all 0.3s ease;
+}
+
 .postArchiveItem {
     background: lightgrey;
     border-radius: 20px;
@@ -185,16 +205,36 @@ footer a:hover {
     }
 }
 
-.editPost {
-    width: 50px;
-    height: auto;
-    margin-left: 90%;
+.postArchiveActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1em;
+}
+
+.splnenoTickBox {
+    scale: 2;
+}
+
+.editBarvaBtn {
+    width: 30px;
     transition: all 0.3s ease;
 
 }
 
+.editBarvaBtn:hover {
+    transform: scale(1.2);
+    transition: all 0.3s ease;
+}
+
+.editPost {
+    width: 30px;
+    height: auto;
+    transition: all 0.3s ease;
+}
+
 .editPost:hover {
-    transform: scale(1.1);
+    transform: scale(1.2);
     transition: all 0.3s ease;
 }
 
@@ -205,6 +245,7 @@ footer a:hover {
     
 }
 
+
 .zadano {
     color: green;
     font-weight: bold;
@@ -214,6 +255,8 @@ footer a:hover {
     color: red;
     font-weight: bold;
 }
+
+
 
 
 /* ----------------------- FILTRACE ------------------------------*/
@@ -292,6 +335,14 @@ display: flex;
 
 .addPost {
     scale: 1.2;
+    transition: all 0.3s ease;
+
+}
+
+.addPost:hover {
+    transform: scale(1.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 @media screen and (max-width: 667px) {
@@ -320,6 +371,16 @@ display: flex;
   width: 100%; height: 100%;
   z-index: 1000;
 }
+
+
+@media screen and (max-width: 667px) {
+  .modal-content {
+    width: 80% !important;
+    padding: 1em;
+  }
+    
+}
+
 .modal.modal-open {
   display: block;
 }
@@ -359,6 +420,7 @@ select.form-control {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 .form-error {
   color: red;
   font-size: .9em;
@@ -372,6 +434,7 @@ select.form-control {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .btn.save       { background: darkred; color: #fff; }
 input.btn.save  { background: darkred; color: #fff; }
 .btn.cancel     { background: #ccc; }
@@ -380,3 +443,25 @@ input.btn.save  { background: darkred; color: #fff; }
 .postArchiveItem.cervena { background: lightcoral; }
 .postArchiveItem.modra   { background: lightblue; }
 .postArchiveItem.fialova { background: plum; }
+
+
+
+
+
+
+/* ----------------------- STRANKA S PROCESEM ------------------------------*/
+
+main:has(.procesProjektu) {
+    justify-items: left;
+    padding-left: 50px;
+}
+
+.procesProjektu {
+    display: flex;
+    padding-top: 200px;
+    justify-content: left;
+    align-items: left;
+    flex-direction: column;
+    
+
+}

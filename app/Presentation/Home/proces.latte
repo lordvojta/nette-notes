@@ -1,0 +1,51 @@
+{block content}
+<main class="d-flex justify-content-start ps-5">
+  <div class="procesProjektu d-flex flex-column pt-5 justify-content-start align-items-start">
+    <h1 class="mb-4">Zadání</h1>
+    <strong>Vytvoř prosím jednu webovou stránku na vlastním serveru (či lokálním serveru), která bude obsahovat:</strong>
+    <ul>
+      <li>Tabulku s přehledem úkolů pomocí datagridu se všemi daty uloženými v MySQL,</li>
+      <li>Komunikace s DTB pomocí SQL dotazů</li>
+      <li>Možnost vyhledávat, řadit a filtrovat úkoly podle všech atributů,</li>
+      <li>Řádky tabulky budou obarvené podle barvy úkolu.</li>
+      <li>Možnost přímo v tabulce změnit barvu úkolu (řádku) pomocí JS a AJAX</li>
+    </ul>
+
+<strong>Každý úkol bude mít tyto čtyři atributy:</strong>
+    <ul>
+      <li>Termín</li>
+      <li>Název</li>
+      <li>Popis</li>
+      <li>Barva</li>
+    </ul>
+<p>Na stránce bude tlačítko „Přidat úkol“, které otevře formulář v modálním okně. Stejné modální okno použij i pro editaci existujících úkolů.</p>
+
+<strong>Použité technologie:</strong>
+  <ul>
+    <li>Backend: Nette v poslední verzi</li>
+    <li>DTB: MySQL</li>
+    <li>Frontend: Bootstrap, CSS</li>
+    <li>Dále můžeš použít: JS / jQuery / Vue – podle toho, co ti nejvíc vyhovuje</li>
+  </ul>
+
+    <h1 class="mb-4">Jak jsem postupoval</h1>
+    <ol class="ps-3">
+      <li>Nainstaloval jsem composer</li>
+      <li>Stáhnul jsem si Nette boilerplate skrze composer</li>
+      <li>Rozjel jsem si dev server přes command z readme file. Boilerplate je nyní viditelný na localhost:8000.</li>
+      <li>Stáhnul jsem si adminer a přiložil jsem ho do codebase</li>
+      <li>Rozjel jsem MySQL v XAMPP</li>
+      <li>Založil jsem tabulku posts přes SQL command</li>
+      <li>Do tabulky jsem si pomocí INSERT nahrál dummy data</li>
+      <li>V Nette configu jsem deklaroval informace o DB</li>
+      <li>Vpíchnul jsem DB do HomePreseneru</li>
+      <li>Místo dummy posts jsem napsal poznámky pro zahradníka</li>
+      <li>Kompletně jsem vytvořil celý frontend mimo modálních oken</li>
+      <li>Vytvořil jsem modální okna pomocí CSS a JS</li>
+      <li>Naprogramoval jsem backend do HomePreseteru</li>
+      <li>V RouterFactory jsem zajistil aby fungoval routing pro stránku procesu</li>
+      <li>Vytvořil jsem tuto statickou stránku, kde jsem využil bootstrap k stylování</li>
+    </ol>
+  </div>
+</main>
+{/block}

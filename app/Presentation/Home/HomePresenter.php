@@ -15,14 +15,14 @@ final class HomePresenter extends Nette\Application\UI\Presenter
     ) {}
 
     /**
-     * Render výchozí akce: posledních 5 příspěvků
+     * Render posledních 6 příspěvků
      */
     public function renderDefault(): void
     {
         $this->template->posts = $this->database
             ->table('posts')
-            ->order('created_at DESC')
-            ->limit(5);
+            ->order('created_at ASC')
+            ->limit(6);
     }
 
     /**
@@ -152,4 +152,58 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $this->flashMessage('Poznámka byla úspěšně upravena.', 'success');
         $this->redirect('this');
     }
+
+	/**
+	 * Zpracování odstranění poznámky
+	 */
+	  public function handleDelete(int $id): void
+    {
+        $post = $this->database->table('posts')->get($id);
+        if ($post) {
+            $post->delete();
+            $this->flashMessage('Poznámka byla úspěšně smazána.', 'success');
+        } else {
+            $this->flashMessage('Tento příspěvek neexistuje.', 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->redrawControl('postArchive');
+        } else {
+            $this->redirect('this');
+        }
+    }
+
+	/**
+	 * Zpracování zmeny barvy skrze thumnail
+	 */
+
+public function handleChangeColor(int $id): void
+{
+    $post = $this->database->table('posts')->get($id);
+    if (!$post) {
+        $this->error('Příspěvek nenalezen');
+    }
+
+    $colors  = ['cervena','modra','fialova'];
+    $current = array_search($post->color, $colors, true);
+    $next    = $colors[(($current === false ? 0 : $current) + 1) % count($colors)];
+
+    // uložíme
+    $post->update(['color' => $next]);
+
+    // vrátíme JSON
+    if ($this->isAjax()) {
+        $this->sendJson([
+            'id'    => $id,
+            'color' => $next,
+        ]);
+    } else {
+        $this->redirect('this');
+    }
+}
+
+
+
+
+	
 }

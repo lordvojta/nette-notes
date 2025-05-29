@@ -5,11 +5,20 @@
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="{$basePath}/css/style.css">
 	<title>{ifset title}{include title|stripHtml} | {/ifset}WEBZI NOTES</title>
+	
+
 </head>
 
 
 
 <body>
+		  <script src="https://unpkg.com/naja@2/dist/Naja.min.js"></script>
+			<script>
+				// AJAX knihovna pro Nette
+				naja.initialize();
+			</script>
+
+
 	<header>
 	
 	<div class="logoContainer">
@@ -21,8 +30,8 @@
 		<nav>
 			<ul class="mainNav">
 				<li><a href="{$basePath}/home">Domů</a></li>
-				<li><a href="{$basePath}/posts">Proces projektu</a></li>
-				<li><a href="{$basePath}/contact">Kontakt</a></li>
+				<li><a n:href="Home:Proces">Proces projektu</a></li>
+				<li><a href="#">Kontakt</a></li>
 			</ul>
 			<img src="/img/burger.svg" alt="mobilni menu ikona" class="burgerMenu">
 		</nav>

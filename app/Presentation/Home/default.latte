@@ -1,26 +1,38 @@
 {block content}
     <section class="filtr">
-		<img class="filtrIkona addPost" src="/img/add.svg" alt="přidat poznámku">		<a href="#"><div class="filtrItem">Přidáno&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
-		<a href="#"><div class="filtrItem">Deadline&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
-		<a href="#"><div class="filtrItem">Barva&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
-		<a href="#"><div class="filtrItem">Filtrovat&nbsp;<img class="filtrIkona" src="/img/filter.svg"></div></a>
+		<img class="filtrIkona addPost" src="/img/add.svg" alt="přidat poznámku">
+		<a href="#"><div class="filtrItem sortBtn">Přidáno&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+		<a href="#"><div class="filtrItem sortBtn">Deadline&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+		<a href="#"><div class="filtrItem sortBtn">Barva&nbsp;<img class="filtrIkona" src="/img/sort.svg"></div></a>
+		<a href="javascript:void(0)" class="filtrItem" id="filterBtn">Filtrovat&nbsp;<img class="filtrIkona" src="/img/filter.svg"></a>
 		<input type="text" class="filtrSearch" placeholder="Hledat...">
-		<a href="#"><div class="filtrItem"><img class="filtrIkona resetFiltr" src="/img/reset.svg" alt="resetovat filtraci"></div></a>
+		<a href="javascript:void(0)" id="resetBtn"><div class="filtrItem"><img class="filtrIkona resetFiltr" src="/img/reset.svg" alt="resetovat filtraci"></div></a>
 
 
 	</section>
 
-  <section class="postArchive">
-    {foreach $posts as $post}
-      <div
-        class="postArchiveItem {$post->color}"    {* CSS třída podle barvy *}
-        data-id="{$post->id}"
-        data-title="{$post->title|escape:'html'}"
-        data-deadline="{$post->deadline|date:'Y-m-d'}"
-        data-content="{$post->content|escape:'html'}"
-        data-color="{$post->color}"
+<section n:snippet="postArchive" class="postArchive">
+	    {foreach $posts as $post}
+     <div
+      class="postArchiveItem {$post->color}"
+      data-id="{$post->id}"
+      data-title="{$post->title|escape:'html'}"
+      data-content="{$post->content|escape:'html'}"
+      data-deadline="{$post->deadline|date:'Y-m-d'}"
+      data-created="{$post->created_at->format('Y-m-d H:i:s')}"
+      data-color="{$post->color}"
       >
-        <h2>{$post->title}</h2>
+	    {*Nadpis a koš pro smazani poznamky *}
+		<div class="postArchiveItemHeader">
+	  	<h2>{$post->title}</h2>
+		  {* Ikona pro smazání poznámky *}
+		<a n:href="delete! $post->id"
+             onclick="return confirm('Jsi si jistý, že to chceš smazat?');"
+             title="Smazat poznámku"
+          >
+            <img src="/img/kos.svg" class="smazatPoznamku" alt="smazat poznámku">
+          </a>
+		</div>
         <div><span class="zadano">Zadáno:</span>
           {$post->created_at|date:'F j, Y'}
         </div>
@@ -29,11 +41,27 @@
         </div>
         <br>
         <div>{$post->content|truncate:255}</div>
-        <div class="filtrItem">
+        <div class="postArchiveActions">
           {* Ikona pro otevření modalu „Upravit poznámku“ *}
           <a href="javascript:void(0)" class="editPostBtn">
             <img class="editPost" src="/img/edit.svg" alt="editovat poznámku">
           </a>
+        {* Ikona pro AJAX změnu barvy *}
+        <a 
+      href="{$presenter->link('changeColor!', $post->id)}"
+      class="ajax-change-color"
+      data-id="{$post->id}"
+      title="Změnit barvu"
+    >
+      <img 
+        src="/img/kyblik.svg" 
+        class="editBarvaBtn" 
+        alt="změnit barvu"
+      >
+    </a>
+        {* Checkbox pro splnění poznámky *}
+		 <input class="splnenoTickBox" type="checkbox">
+
         </div>
       </div>
     {/foreach}
@@ -62,6 +90,32 @@
       {control editForm}
     </div>
   </div>
+
+  {* ===== MODAL – Filtrování ===== *}
+<div id="filterModal" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close">&times;</button>
+    <h2>Filtrovat příspěvky</h2>
+    <form id="filterForm">
+      <div class="form-group">
+        <label for="filterField">Pole</label>
+        <select id="filterField" class="form-control">
+          <option value="title">Titulek</option>
+          <option value="content">Obsah</option>
+          <option value="color">Barva</option>
+          <option value="deadline">Deadline</option>
+          <option value="created">Přidáno</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="filterValue">Hledaná hodnota</label>
+        <input type="text" id="filterValue" class="form-control">
+      </div>
+      <button type="submit" class="btn save">Použít filtr</button>
+    </form>
+  </div>
+</div>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -95,7 +149,7 @@
         form.elements.deadline.value = item.dataset.deadline;
         form.elements.content.value  = item.dataset.content;
 
-        // Naplnění RadioList barvy
+        // Naplnění radio listu barvy
         form.querySelectorAll('input[name="color"]').forEach(r => {
           r.checked = (r.value === item.dataset.color);
         });
@@ -115,5 +169,276 @@
       });
     });
   });
-  </script>
+
+ </script>
+
+
+<script n:syntax="off">
+// —————————————————————————————————————
+//  Globální stav filtrů a řazení
+// —————————————————————————————————————
+let currentSearch = '';          // text pro fulltextové hledání
+let currentFilter = null;        // objekt { field, value } nebo null
+let currentSort   = null;        // 'created' | 'deadline' | 'color'
+let sortAsc       = true;        // směr řazení: true = vzestupně
+
+// Původní pořadí položek; naplní se při inicializaci
+let originalOrderItems = [];
+
+/**
+ * applyFilterSort()
+ * 1) Zkopíruje původní pořadí
+ * 2) Označí každou položku, zda vyhovuje fulltextu a filtru
+ * 3) Vyfiltruje a případně seřadí
+ * 4) Vykreslí výsledné položky do DOM
+ */
+function applyFilterSort() {
+  const container = document.querySelector('.postArchive');
+  // 1) začneme vždy z původního pořadí
+  let items = originalOrderItems.slice();
+
+  // 2) označíme matchesSearch a matchesFilter
+  items.forEach(item => {
+    const text = (item.dataset.title + ' ' + item.dataset.content).toLowerCase();
+    // fulltext
+    item.matchesSearch = !currentSearch || text.includes(currentSearch);
+    // filter podle vybraného pole
+    if (!currentFilter) {
+      item.matchesFilter = true;
+    } else {
+      const fieldVal = (item.dataset[currentFilter.field] || '').toLowerCase();
+      item.matchesFilter = fieldVal.includes(currentFilter.value);
+    }
+  });
+
+  // 3a) aplikujeme filtr
+  let displayed = items.filter(item => item.matchesSearch && item.matchesFilter);
+
+  // 3b) aplikujeme řazení, pokud je vybrané
+  if (currentSort) {
+    displayed.sort((a, b) => {
+      let va = a.dataset[currentSort], vb = b.dataset[currentSort];
+      // datumová pole převedeme na Date
+      if (['created','deadline'].includes(currentSort)) {
+        va = new Date(va);
+        vb = new Date(vb);
+      }
+      if (va < vb) return sortAsc ? -1 : 1;
+      if (va > vb) return sortAsc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // 4) vykreslíme zpět do kontejneru
+  container.innerHTML = '';
+  displayed.forEach(item => container.appendChild(item));
+}
+
+/**
+ * initFilter()
+ * Jednorázové napojení všech event listenerů a načtení výchozího stavu
+ */
+function initFilter() {
+  const container = document.querySelector('.postArchive');
+  // 1) uložíme si původní pořadí položek
+  originalOrderItems = Array.from(container.children);
+
+  // 2) najdeme prvky UI
+  const searchInput = document.querySelector('.filtrSearch');
+  const resetBtn    = document.getElementById('resetBtn');
+  const sortBtns    = document.querySelectorAll('.filtrItem.sortBtn');
+  const filterBtn   = document.getElementById('filterBtn');
+  const filterModal = document.getElementById('filterModal');
+  const filterForm  = document.getElementById('filterForm');
+  const filterField = document.getElementById('filterField');
+  const filterValueContainer = document.getElementById('filterValue').parentElement;
+
+  // — fulltext live-search
+  searchInput.oninput = () => {
+    currentSearch = searchInput.value.trim().toLowerCase();
+    applyFilterSort();
+  };
+
+  // — řazení při kliknutí na tlačítko sortBtn
+  sortBtns.forEach(btn => {
+    btn.style.cursor = 'pointer';
+    btn.onclick = e => {
+      e.preventDefault();
+      // určujeme, podle čeho řadit
+      const key = btn.textContent.trim().toLowerCase();
+      currentSort = key === 'přidáno' ? 'created'
+                  : key === 'deadline' ? 'deadline'
+                  : 'color';
+      // přepneme směr řazení
+      sortAsc = !sortAsc;
+      // reset ikon u všech buttonů
+      sortBtns.forEach(b => 
+        b.querySelector('img.filtrIkona').src = '/img/sort.svg'
+      );
+      // ikonka na aktuálním tlačítku
+      btn.querySelector('img.filtrIkona')
+         .src = sortAsc ? '/img/vzestupne.svg' : '/img/sestupne.svg';
+      applyFilterSort();
+    };
+  });
+
+  // — otevření + zavření modalu filtru
+  filterBtn.onclick = e => {
+    e.preventDefault();
+    filterModal.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    // vynutíme vygenerování inputu/select pro filterValue
+    filterField.dispatchEvent(new Event('change'));
+  };
+  // zavírací prvky modalu
+  [...filterModal.querySelectorAll('.modal-overlay, .modal-close')]
+    .forEach(x => x.onclick = () => {
+      filterModal.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    });
+
+  // — přepínání mezi text inputem a select podle vybraného pole
+  filterField.onchange = () => {
+    const field = filterField.value;
+    if (['color','deadline','created'].includes(field)) {
+      // získáme jedinečné hodnoty z data-atributů
+      const vals = Array.from(new Set(
+        originalOrderItems.map(i => i.dataset[field])
+      )).filter(v => v).sort();
+      // sestavíme <select>
+      let html = `<label for="filterValue">Vyber ${field}</label>
+                  <select id="filterValue" class="form-control">
+                    <option value="">(vše)</option>`;
+      vals.forEach(v => html += `<option value="${v}">${v}</option>`);
+      html += `</select>`;
+      filterValueContainer.innerHTML = html;
+    } else {
+      // standardní textové pole
+      filterValueContainer.innerHTML = `
+        <label for="filterValue">Hledaná hodnota</label>
+        <input type="text" id="filterValue" class="form-control">`;
+    }
+  };
+
+  // — odeslání formuláře filtru
+  filterForm.onsubmit = e => {
+    e.preventDefault();
+    const field = filterField.value;
+    const value = document.getElementById('filterValue').value.trim().toLowerCase();
+    currentFilter = value ? { field, value } : null;
+    applyFilterSort();
+    filterModal.classList.remove('modal-open');
+    document.body.style.overflow = '';
+  };
+
+  // — reset veškerého stavu (search + filter + sort)
+  resetBtn.onclick = e => {
+    e.preventDefault();
+    currentSearch = '';
+    currentFilter = null;
+    currentSort   = null;
+    sortAsc       = true;
+    searchInput.value = '';
+    // reset ikon zpět na default
+    sortBtns.forEach(b => 
+      b.querySelector('img.filtrIkona').src = '/img/sort.svg'
+    );
+    applyFilterSort();
+  };
+}
+
+// —————————————————————————————————————
+//  AJAX změna barvy – delegovaný klik na <a.ajax-change-color>
+// —————————————————————————————————————
+function initColorAjax() {
+  document.body.addEventListener('click', async e => {
+    const anchor = e.target.closest('a.ajax-change-color');
+    if (!anchor) return;
+    e.preventDefault();
+    try {
+      // pošleme požadavek jako XHR
+      const response = await fetch(anchor.href, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      // najdeme odpovídající položku a aktualizujeme barvu
+      const item = document.querySelector(`.postArchiveItem[data-id="${payload.id}"]`);
+      if (item) {
+        item.classList.remove('cervena','modra','fialova');
+        item.classList.add(payload.color);
+        item.dataset.color = payload.color;
+      }
+    } catch (err) {
+      console.error('Chyba při AJAX změně barvy:', err);
+    }
+  });
+}
+
+// —————————————————————————————————————
+//  Inicializace po načtení stránky i po AJAX redrawu
+// —————————————————————————————————————
+document.addEventListener('DOMContentLoaded', () => {
+  initFilter();
+  applyFilterSort();
+  initColorAjax();
+});
+document.addEventListener('nette:afterUpdate', () => {
+  // po redrawu fragmentu znovu načteme položky a reaplikujeme eventy
+  initFilter();
+  applyFilterSort();
+  // initColorAjax nemusíme volat znovu (událost je delegovaná)
+});
+
+
+
+
+// —————————————————————————————————————
+//  Persistující tickboxy pomocí localStorage
+// —————————————————————————————————————
+
+/**
+ * inicializujTickboxy()
+ * - Načte stav z localStorage pro každý post
+ * - Nastaví event listener pro uložení změny
+ */
+function inicializujTickboxy() {
+  // vybereme všechny položky
+  document.querySelectorAll('.postArchiveItem').forEach(item => {
+    const id = item.dataset.id;
+    const checkbox = item.querySelector('.splnenoTickBox');
+    if (!checkbox) return;
+
+    // načteme uložený stav: 'true' nebo 'false'
+    const saved = localStorage.getItem(`postCompleted_${id}`);
+    if (saved !== null) {
+      checkbox.checked = saved === 'true';
+      // případně přidat třídu pro styl (např. pro přeškrtnutí)
+      item.classList.toggle('completed', checkbox.checked);
+    }
+
+    // při změně checkboxu ukládáme stav
+    checkbox.addEventListener('change', () => {
+      localStorage.setItem(`postCompleted_${id}`, checkbox.checked);
+      // třídu completed můžete využít pro CSS styl (např. změní průhlednost)
+      item.classList.toggle('completed', checkbox.checked);
+    });
+  });
+}
+
+// zavoláme hned při načtení a po AJAX redrawu
+document.addEventListener('DOMContentLoaded',   inicializujTickboxy);
+document.addEventListener('nette:afterUpdate', inicializujTickboxy);
+</script>
+
+
+
+
+
+
+
+
+
+
+
 {/block}
