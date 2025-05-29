@@ -8,6 +8,8 @@ use Nette;
 use Nette\Bootstrap\Configurator;
 
 
+
+
 class Bootstrap
 {
 	private Configurator $configurator;

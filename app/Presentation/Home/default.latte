@@ -1,3 +1,5 @@
+{block title}Úvod{/block}
+
 {block content}
     <section class="filtr">
 		<img class="filtrIkona addPost" src="/img/add.svg" alt="přidat poznámku">
@@ -11,7 +13,7 @@
 
 	</section>
 
-<section n:snippet="postArchive" class="postArchive">
+<section n:snippet="postArchive" class="postArchive">     {*nutno použít n:snippet="postArchive", aby se to dalo použít v AJAXu*}
 	    {foreach $posts as $post}
      <div
       class="postArchiveItem {$post->color}"
@@ -34,10 +36,10 @@
           </a>
 		</div>
         <div><span class="zadano">Zadáno:</span>
-          {$post->created_at|date:'F j, Y'}
+          {$post->created_at|date:'j.n.Y'}
         </div>
         <div><span class="deadline">Deadline:</span>
-          {$post->deadline|date:'F j, Y'}
+          {$post->deadline|date:'j.n.Y'}
         </div>
         <br>
         <div>{$post->content|truncate:255}</div>
@@ -117,6 +119,7 @@
   </div>
 </div>
 
+{* ===== MODAL – Fukcionalita ==== *}
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Získání elementů pro „Přidat“
@@ -140,7 +143,7 @@
     // Otevření modalu pro úpravu s naplněním dat
     editBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        const item = btn.closest('.postArchiveItem');
+        const item = btn.closest('.postArchiveItem');                               //hledá než najde nejbližšího rodiče s třídou .postArchiveItem
         const form = editModal.querySelector('form');
 
         // Naplníme skryté pole id a ostatní kontrolky
@@ -149,18 +152,18 @@
         form.elements.deadline.value = item.dataset.deadline;
         form.elements.content.value  = item.dataset.content;
 
-        // Naplnění radio listu barvy
-        form.querySelectorAll('input[name="color"]').forEach(r => {
+        // Naplnění radio listu barvy - zaškrtneme ten, který odpovídá barvě karty
+        form.querySelectorAll('input[name="color"]').forEach(r => { 
           r.checked = (r.value === item.dataset.color);
         });
 
         editModal.classList.add('modal-open');
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';                                  // aby se nepřidával scroll a nešlo to přes okraj
       });
     });
 
     // Zavření všech otevřených modalů
-    [...overlays, ...closeBtns].forEach(el => {
+    [...overlays, ...closeBtns].forEach(el => {                                   // ... znamená že to jsou všechny elementy v poli, je to spread operator
       el.addEventListener('click', () => {
         document.querySelectorAll('.modal.modal-open').forEach(m => {
           m.classList.remove('modal-open');
@@ -173,7 +176,7 @@
  </script>
 
 
-<script n:syntax="off">
+<script n:syntax="off"> // n:syntax="off" vypne Latte parser. To mi poradil Tracy. 
 // —————————————————————————————————————
 //  Globální stav filtrů a řazení
 // —————————————————————————————————————
@@ -199,37 +202,37 @@ function applyFilterSort() {
 
   // 2) označíme matchesSearch a matchesFilter
   items.forEach(item => {
-    const text = (item.dataset.title + ' ' + item.dataset.content).toLowerCase();
-    // fulltext
-    item.matchesSearch = !currentSearch || text.includes(currentSearch);
+    const text = (item.dataset.title + ' ' + item.dataset.content).toLowerCase(); //spojí to titulek a poznámku do stringu a neřeší to velká a malá písmena
+    item.matchesSearch = !currentSearch || text.includes(currentSearch);          // pokud je to prázdný, tak to ukáže všechny položky jinak to porovná s textem
     // filter podle vybraného pole
     if (!currentFilter) {
-      item.matchesFilter = true;
+      item.matchesFilter = true;                                                 // pokud není žádný filtr, tak ukáže všechny položky
     } else {
-      const fieldVal = (item.dataset[currentFilter.field] || '').toLowerCase();
-      item.matchesFilter = fieldVal.includes(currentFilter.value);
+      const fieldVal = (item.dataset[currentFilter.field] || '').toLowerCase();  // pokud není žádná hodnota, tak nastaví prázdný string, aby se to neporovnávalo s undefined
+      item.matchesFilter = fieldVal.includes(currentFilter.value);               // pomocí metodty includes kontroluje, zda hodnota obsahuje hledaný text
     }
   });
 
   // 3a) aplikujeme filtr
-  let displayed = items.filter(item => item.matchesSearch && item.matchesFilter);
+  let displayed = items.filter(item => item.matchesSearch && item.matchesFilter); // vyfiltrujeme položky, které odpovídají fulltextu a filtru
 
   // 3b) aplikujeme řazení, pokud je vybrané
-  if (currentSort) {
-    displayed.sort((a, b) => {
-      let va = a.dataset[currentSort], vb = b.dataset[currentSort];
+  if (currentSort) {                                                             
+    displayed.sort((a, b) => {                                                   // A představuje první položku, B druhou položku
+      let va = a.dataset[currentSort], vb = b.dataset[currentSort];              // získáme hodnoty podle aktuálního řazení
       // datumová pole převedeme na Date
       if (['created','deadline'].includes(currentSort)) {
         va = new Date(va);
         vb = new Date(vb);
       }
-      if (va < vb) return sortAsc ? -1 : 1;
-      if (va > vb) return sortAsc ? 1 : -1;
-      return 0;
+      // porovnáme hodnoty
+      if (va < vb) return sortAsc ? -1 : 1;                                        // pokud je a menší než b, vrátíme -1 nebo 1 podle směru řazení
+      if (va > vb) return sortAsc ? 1 : -1;                                        // pokud je a větší než b, vrátíme 1 nebo -1 podle směru řazení                   
+      return 0; 
     });
   }
 
-  // 4) vykreslíme zpět do kontejneru
+  // 4) vykreslíme zpět do kontejneru toho, co odpovídá filtrům a řazení
   container.innerHTML = '';
   displayed.forEach(item => container.appendChild(item));
 }
@@ -266,16 +269,16 @@ function initFilter() {
       e.preventDefault();
       // určujeme, podle čeho řadit
       const key = btn.textContent.trim().toLowerCase();
-      currentSort = key === 'přidáno' ? 'created'
+      currentSort = key === 'přidáno' ? 'created'                                          // toto není flexibilní, ale co už
                   : key === 'deadline' ? 'deadline'
                   : 'color';
       // přepneme směr řazení
       sortAsc = !sortAsc;
-      // reset ikon u všech buttonů
+      // při změně řazení se všechny ikony sortovacích tlačítek vrátí zpět na výchozí podobu
       sortBtns.forEach(b => 
         b.querySelector('img.filtrIkona').src = '/img/sort.svg'
       );
-      // ikonka na aktuálním tlačítku
+      // nastavíme ikonu podle směru řazení
       btn.querySelector('img.filtrIkona')
          .src = sortAsc ? '/img/vzestupne.svg' : '/img/sestupne.svg';
       applyFilterSort();
@@ -286,11 +289,11 @@ function initFilter() {
   filterBtn.onclick = e => {
     e.preventDefault();
     filterModal.classList.add('modal-open');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';                                                  // aby se nepřidával scroll a nešlo to přes okraj
     // vynutíme vygenerování inputu/select pro filterValue
     filterField.dispatchEvent(new Event('change'));
   };
-  // zavírací prvky modalu
+  // zavírací prvky modalu krizek a overlay
   [...filterModal.querySelectorAll('.modal-overlay, .modal-close')]
     .forEach(x => x.onclick = () => {
       filterModal.classList.remove('modal-open');
@@ -322,13 +325,13 @@ function initFilter() {
 
   // — odeslání formuláře filtru
   filterForm.onsubmit = e => {
-    e.preventDefault();
-    const field = filterField.value;
-    const value = document.getElementById('filterValue').value.trim().toLowerCase();
-    currentFilter = value ? { field, value } : null;
-    applyFilterSort();
-    filterModal.classList.remove('modal-open');
-    document.body.style.overflow = '';
+    e.preventDefault();                                                                 // zabráníme reloadu stránky
+    const field = filterField.value;                                                    // získáme vybrané pole
+    const value = document.getElementById('filterValue').value.trim().toLowerCase();    // získáme hodnotu z inputu/selectu, ořežeme mezery a převedeme na malá písmena
+    currentFilter = value ? { field, value } : null;                                    // pokud je hodnota prázdná, nastavíme filtr na null, jinak vytvoříme objekt s polem a hodnotou
+    applyFilterSort();                                                                  // aplikujeme filtr a řazení - funkce
+    filterModal.classList.remove('modal-open');                                         // zavřeme modal
+    document.body.style.overflow = '';                                                  // vrátíme scrollování zpět
   };
 
   // — reset veškerého stavu (search + filter + sort)
@@ -339,7 +342,7 @@ function initFilter() {
     currentSort   = null;
     sortAsc       = true;
     searchInput.value = '';
-    // reset ikon zpět na default
+    // reset řadících ikon zpět na default
     sortBtns.forEach(b => 
       b.querySelector('img.filtrIkona').src = '/img/sort.svg'
     );
@@ -351,23 +354,23 @@ function initFilter() {
 //  AJAX změna barvy – delegovaný klik na <a.ajax-change-color>
 // —————————————————————————————————————
 function initColorAjax() {
-  document.body.addEventListener('click', async e => {
-    const anchor = e.target.closest('a.ajax-change-color');
-    if (!anchor) return;
-    e.preventDefault();
-    try {
-      // pošleme požadavek jako XHR
-      const response = await fetch(anchor.href, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  document.body.addEventListener('click', async e => {                                           // posloucháme kliknutí na celé tělo dokumentu
+    const anchor = e.target.closest('a.ajax-change-color');                                      // hledáme nejbližší <a> s třídou ajax-change-color
+    if (!anchor) return;                                                                         // pokud není nalezeno, nic neděláme
+    e.preventDefault();                                                                          // zabráníme výchozímu chování odkazu
+    try {                                                                                        
+  
+      const response = await fetch(anchor.href, {                                                // Pošleme AJAX request na URL z href odkazu
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }                                        // přidáme hlavičku pro AJAX
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);                              // pokud není odpověď OK, vyhodíme chybu
+      const payload = await response.json();                                                     // očekáváme JSON odpověď
       // najdeme odpovídající položku a aktualizujeme barvu
-      const item = document.querySelector(`.postArchiveItem[data-id="${payload.id}"]`);
-      if (item) {
-        item.classList.remove('cervena','modra','fialova');
-        item.classList.add(payload.color);
-        item.dataset.color = payload.color;
+      const item = document.querySelector(`.postArchiveItem[data-id="${payload.id}"]`);          // vyhledáme položku podle data-id
+      if (item) { 
+        item.classList.remove('cervena','modra','fialova');                                       // odstraníme všechny barvy, které by tam mohly být
+        item.classList.add(payload.color);                                                        // přidáme novou barvu
+        item.dataset.color = payload.color;                                                       // aktualizujeme data-atribut pro barvu
       }
     } catch (err) {
       console.error('Chyba při AJAX změně barvy:', err);
@@ -376,14 +379,14 @@ function initColorAjax() {
 }
 
 // —————————————————————————————————————
-//  Inicializace po načtení stránky i po AJAX redrawu
+//  Inicializace po načtení stránky i po AJAX redrawu.                    
 // —————————————————————————————————————
 document.addEventListener('DOMContentLoaded', () => {
   initFilter();
   applyFilterSort();
   initColorAjax();
 });
-document.addEventListener('nette:afterUpdate', () => {
+document.addEventListener('nette:afterUpdate', () => {                                            // (Nette event)
   // po redrawu fragmentu znovu načteme položky a reaplikujeme eventy
   initFilter();
   applyFilterSort();
@@ -394,7 +397,7 @@ document.addEventListener('nette:afterUpdate', () => {
 
 
 // —————————————————————————————————————
-//  Persistující tickboxy pomocí localStorage
+//   tickbox localStorage
 // —————————————————————————————————————
 
 /**

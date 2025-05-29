@@ -23,7 +23,7 @@
 	
 	<div class="logoContainer">
 		<a href="/"><img src="{$basePath}/img/logo.png" alt="logo webzi"></a>
-		<strong><span>POZNÁMKOVÝ BLOG</span></strong>
+		<strong><span>ÚKOLNÍČEK</span></strong>
 		
 	</div>
 	<div class="navContainer">
@@ -41,7 +41,7 @@
 </header>
 	<main>
 
-	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div> 
 	
 
 	{include content}
